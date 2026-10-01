@@ -39,9 +39,25 @@ ClaudeUsageApplet.prototype = {
             null
         );
 
+        const lang = GLib.getenv('LANG') || '';
+        const isPtBr = lang.toLowerCase().startsWith('pt');
+        
+        this.i18n = {
+            loading: isPtBr ? "Carregando..." : "Loading...",
+            session: isPtBr ? "Sessão" : "Session",
+            week: isPtBr ? "Semana" : "Week",
+            autoUpdate: isPtBr ? "Atualização automática:" : "Auto update:",
+            min: isPtBr ? "min" : "min",
+            hoverToRefresh: isPtBr ? "Passe o mouse novamente para atualizar" : "Hover again to refresh",
+            error: isPtBr ? "Não foi possível obter o uso." : "Could not fetch usage.",
+            resets: isPtBr ? "Reseta:" : "Resets:"
+        };
+
         // Estado
         this.sessionUsage = null;
+        this.sessionReset = null;
         this.weekUsage = null;
+        this.weekReset = null;
 
         this.isUpdating = false;
         this.hoverRefreshDone = false;
@@ -49,7 +65,7 @@ ClaudeUsageApplet.prototype = {
         this.hoverLeaveId = null;
 
         this.set_applet_label("Claude --%");
-        this.set_applet_tooltip("Claude Code\nCarregando...");
+        this.set_applet_tooltip("Claude Code\n" + this.i18n.loading);
 
         // Atualização inicial
         this.updateUsage();
@@ -128,9 +144,7 @@ ClaudeUsageApplet.prototype = {
 
         this.isUpdating = true;
 
-        const command =
-            'claude -p "/usage" 2>/dev/null | ' +
-            'grep -oP "\\\\d+(?=% used)" | head -2';
+        const command = 'claude -p "/usage" 2>/dev/null';
 
         let subprocess;
 
@@ -169,18 +183,37 @@ ClaudeUsageApplet.prototype = {
     },
 
     _processOutput: function(output) {
-        const values = output
-            .trim()
-            .split(/\s+/)
-            .filter(value => /^\d+$/.test(value));
+        const lines = output.split('\n');
+        let sessionUsage = null, sessionReset = null;
+        let weekUsage = null, weekReset = null;
 
-        if (values.length < 2) {
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '').trim();
+            
+            if (line.indexOf('Current session:') >= 0) {
+                const match = line.match(/(\d+)%\s*used.*resets\s+(.+)$/);
+                if (match) {
+                    sessionUsage = parseInt(match[1]);
+                    sessionReset = match[2].trim();
+                }
+            } else if (line.indexOf('Current week') >= 0) {
+                const match = line.match(/(\d+)%\s*used.*resets\s+(.+)$/);
+                if (match) {
+                    weekUsage = parseInt(match[1]);
+                    weekReset = match[2].trim();
+                }
+            }
+        }
+
+        if (sessionUsage === null || weekUsage === null) {
             this._setError();
             return;
         }
 
-        this.sessionUsage = parseInt(values[0]);
-        this.weekUsage = parseInt(values[1]);
+        this.sessionUsage = sessionUsage;
+        this.sessionReset = sessionReset || "N/A";
+        this.weekUsage = weekUsage;
+        this.weekReset = weekReset || "N/A";
 
         this._updateDisplay();
     },
@@ -202,20 +235,14 @@ ClaudeUsageApplet.prototype = {
 
         this.set_applet_tooltip(
             "Claude Code Usage\n\n" +
-            "Sessão\n" +
-            sessionBar +
-            " " +
-            this.sessionUsage +
-            "%\n\n" +
-            "Semana\n" +
-            weekBar +
-            " " +
-            this.weekUsage +
-            "%\n\n" +
-            "Atualização automática: " +
-            this.refreshInterval +
-            " min\n" +
-            "Passe o mouse novamente para atualizar"
+            this.i18n.session + "\n" +
+            sessionBar + " " + this.sessionUsage + "%\n" +
+            this.i18n.resets + " " + this.sessionReset + "\n\n" +
+            this.i18n.week + "\n" +
+            weekBar + " " + this.weekUsage + "%\n" +
+            this.i18n.resets + " " + this.weekReset + "\n\n" +
+            this.i18n.autoUpdate + " " + this.refreshInterval + " " + this.i18n.min + "\n" +
+            this.i18n.hoverToRefresh
         );
     },
 
@@ -244,7 +271,7 @@ ClaudeUsageApplet.prototype = {
         this.set_applet_label("Claude --%");
         this.set_applet_tooltip(
             "Claude Code\n" +
-            "Não foi possível obter o uso."
+            this.i18n.error
         );
     },
 
