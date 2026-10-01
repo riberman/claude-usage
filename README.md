@@ -1,182 +1,246 @@
 # Claude Code Usage
 
-Applet para **Linux Cinnamon** que exibe no painel o percentual de uso do **Claude Code**, utilizando as informações fornecidas pelo próprio comando `/usage`.
+A **Linux Cinnamon** panel applet that displays your **Claude Code** usage percentage, powered by the `/usage` command.
 
 ```text
 Claude 51%
 ```
 
-Ao passar o mouse sobre o applet, são exibidos os detalhes:
+Hovering over the applet shows detailed information:
 
 ```text
 Claude Code Usage
 
-Sessão
+Session
 █████░░░░░ 51%
+Resets: 01/10 20:49
 
-Semana
-█████░░░░░ 48%
+Week
+██████░░░░ 57%
+Resets: in 3 days
 
-Atualização automática: 1 min
+Auto update: 1 min
+Hover again to refresh
 ```
 
-## ✨ Recursos
+---
 
-* 📊 Uso da sessão diretamente no painel.
-* 📈 Uso semanal no tooltip.
-* 🔄 Atualização automática configurável.
-* ⏱️ Intervalo padrão de **1 minuto**.
-* 🔒 Intervalo mínimo de **1 minuto**.
-* 🖱️ Atualização imediata ao entrar com o mouse.
-* 🚫 Evita consultas simultâneas.
-* ⚡ Consultas executadas de forma assíncrona, sem bloquear o Cinnamon.
-* 💾 Mantém o último valor válido caso uma consulta falhe.
-* ⚙️ Configuração integrada ao Cinnamon.
+## ✨ Features
 
-## 🧠 Como funciona
+- 📊 **Session usage** displayed directly on the panel.
+- 📈 **Weekly usage** shown in the tooltip.
+- ⏱️ **Reset time** for both session and week — shown as a formatted date or as a relative countdown ("in 2 hours", "in 3 days").
+- 🎨 **Color indicators** — panel text changes color (green / yellow / red) based on configurable usage thresholds. Colors are fully customizable via a color picker.
+- 🌐 **Multilanguage** — automatically uses **PT-BR** when the system language is Portuguese, otherwise defaults to **English**.
+- 🔄 **Auto-refresh** at a configurable interval (default: 1 minute).
+- 🖱️ **Instant refresh** on mouse hover.
+- 🚫 Prevents simultaneous queries.
+- ⚡ All queries run **asynchronously** — the Cinnamon panel is never blocked.
+- 💾 **Keeps the last valid value** if a query fails.
+- ⚙️ **Integrated Cinnamon settings panel** for all options.
 
-O applet executa localmente:
+---
+
+## 🧠 How it works
+
+The applet runs locally:
 
 ```bash
 claude -p "/usage"
 ```
 
-E extrai os percentuais da saída:
+It parses the full output to extract:
+- The **usage percentage** for the current session and the current week.
+- The **reset date/time** for each (e.g. `Oct 5, 6:59am (America/Sao_Paulo)`).
 
-```bash
-claude -p "/usage" 2>/dev/null \
-  | grep -oP '\d+(?=% used)' \
-  | head -2
-```
+The reset date is parsed into a `Date` object so it can be:
+1. Formatted using a user-defined pattern (e.g. `DD/MM HH:mm` → `05/10 06:59`).
+2. Shown as a relative time diff (e.g. `in 3 days`, `in 2 hours`).
 
-Resultado:
+The project has **no backend, no database, and no external API**.
 
-```text
-51
-48
-```
+---
 
-O primeiro valor representa a sessão e o segundo o uso semanal.
-
-O projeto não utiliza backend, banco de dados ou API própria.
-
-## 📦 Estrutura
+## 📦 Structure
 
 ```text
 claude-usage@riberman/
-├── applet.js
-├── metadata.json
-├── settings-schema.json
-├── install.sh
+├── applet.js           # Main applet logic
+├── metadata.json       # Cinnamon applet metadata
+├── settings-schema.json # Settings definitions
+├── install.sh          # Installer script
 └── README.md
 ```
 
 ### `applet.js`
 
-Implementação principal do applet, incluindo consulta ao Claude Code, atualização da interface, timers e tratamento de erros.
+Core applet implementation: Claude Code querying, output parsing, display updates, timers, color logic, i18n, and error handling.
 
 ### `metadata.json`
 
-Metadados utilizados pelo Cinnamon para identificar o applet.
+Metadata used by Cinnamon to identify the applet.
 
 ### `settings-schema.json`
 
-Define as configurações disponíveis, atualmente o intervalo de atualização.
+Defines all configurable options (see Settings section below).
 
 ### `install.sh`
 
-Instalador automático para:
+Copies all applet files to:
 
 ```text
 ~/.local/share/cinnamon/applets/claude-usage@riberman
 ```
 
-## 🚀 Instalação
+---
 
-Clone ou baixe o projeto e execute:
+## 🚀 Installation
+
+### One-liner (no git required)
+
+Install directly from GitHub with a single command — works with `wget` or `curl`:
 
 ```bash
+# with wget
+bash <(wget -qO- https://raw.githubusercontent.com/riberman/claude-usage/main/install-remote.sh)
+
+# with curl
+bash <(curl -fsSL https://raw.githubusercontent.com/riberman/claude-usage/main/install-remote.sh)
+```
+
+This downloads `applet.js`, `metadata.json` and `settings-schema.json` directly into the Cinnamon applets directory and prints next steps.
+
+### Manual (clone the repo)
+
+```bash
+git clone https://github.com/riberman/claude-usage.git
+cd claude-usage
 chmod +x install.sh
 ./install.sh
 ```
 
-Depois abra:
+### After installing (either method)
 
-**Configurações do Sistema → Miniaplicativos → Claude Code Usage**
+Open:
 
-e adicione o applet ao painel.
+**System Settings → Applets → Claude Code Usage**
 
-Não é necessário utilizar `sudo`.
+and add the applet to your panel. No `sudo` required.
 
-## ⚙️ Configuração
+---
 
-Nas configurações do applet é possível definir o intervalo de atualização.
+## ⚙️ Settings
 
-Padrão:
+All settings are accessible by right-clicking the applet on the panel and selecting **Configure**.
 
-```text
-1 minuto
-```
+### General
 
-Mínimo:
+| Setting | Default | Description |
+|---|---|---|
+| Refresh interval | `1 min` | How often usage is auto-refreshed (1–60 min) |
 
-```text
-1 minuto
-```
+### Reset Time Display
 
-Ao entrar com o mouse sobre o applet, uma consulta adicional é executada uma única vez. Ao sair e entrar novamente, uma nova atualização pode ser realizada.
+| Setting | Default | Description |
+|---|---|---|
+| Show relative time | `off` | Show countdown ("in 2 hours") instead of a formatted date |
+| Session reset format | `DD/MM HH:mm` | Date format for the session reset time |
+| Week reset format | `DD/MM HH:mm` | Date format for the week reset time |
 
-## 🔧 Requisitos
+**Format tokens:**
 
-* Linux
-* Cinnamon Desktop
-* Cinnamon 6.4 ou compatível
-* Claude Code instalado e autenticado
+| Token | Meaning |
+|---|---|
+| `DD` | Day (zero-padded) |
+| `MM` | Month number (zero-padded) |
+| `YYYY` | Full year |
+| `YY` | 2-digit year |
+| `HH` | Hour, 24h (zero-padded) |
+| `hh` | Hour, 12h (zero-padded) |
+| `mm` | Minutes (zero-padded) |
+| `ss` | Seconds (zero-padded) |
+| `A` | `AM` or `PM` |
 
-Teste antes da instalação:
+### Colors and Thresholds
+
+| Setting | Default | Description |
+|---|---|---|
+| Enable colors | `off` | Colorize the panel text based on usage level |
+| Yellow threshold | `30%` | Usage above this % switches from green to yellow |
+| Red threshold | `50%` | Usage above this % switches to red |
+| Green color | `rgba(135,195,79,1)` | Color for low usage |
+| Yellow color | `rgba(246,180,50,1)` | Color for medium usage |
+| Red color | `rgba(230,90,90,1)` | Color for high usage |
+
+Colors can be customized via the native Cinnamon color picker (supports RGBA/HEX).
+
+---
+
+## 🌐 Multilanguage
+
+The applet auto-detects the system language via the `LANG` environment variable.
+
+| Language | Display |
+|---|---|
+| Portuguese (`pt_*`) | PT-BR — "Sessão", "Semana", "Reseta:", "em 2 horas", etc. |
+| Any other | English — "Session", "Week", "Resets:", "in 2 hours", etc. |
+
+The tooltip title also adapts:
+- PT-BR: `Claude Code Uso`
+- EN: `Claude Code Usage`
+
+---
+
+## 🔧 Requirements
+
+- Linux
+- Cinnamon Desktop (tested on Cinnamon 6.4)
+- Claude Code installed and authenticated
+
+Test before installing:
 
 ```bash
 claude -p "/usage"
 ```
 
-## 🐛 Problemas
+---
 
-Se o applet mostrar `Claude --%`, teste:
+## 🐛 Troubleshooting
+
+If the applet shows `Claude --%`, run the command manually in a terminal:
 
 ```bash
-claude -p "/usage" 2>/dev/null \
-  | grep -oP '\d+(?=% used)' \
-  | head -2
+claude -p "/usage"
 ```
 
-O resultado esperado é semelhante a:
+If it works in the terminal but not in the applet, there may be a `PATH` difference in the graphical session. The applet uses `/bin/bash -lc` to load the login shell profile, which normally resolves this.
 
-```text
-51
-48
-```
+---
 
-Se o comando funcionar no terminal mas não no applet, pode haver diferença no `PATH` da sessão gráfica.
+## 🔐 Privacy
 
-## 🔐 Privacidade
+The applet only executes Claude Code locally and processes its output.
 
-O applet apenas executa o Claude Code localmente e processa sua saída.
+No data is sent to any server. No prompts or conversations are stored.
 
-Não possui servidor próprio, banco de dados ou armazenamento de prompts/conversas.
+---
 
 ## 🗺️ Roadmap
 
-* [ ] Melhor suporte a diferentes versões do Cinnamon.
-* [ ] Indicadores visuais por faixa de utilização.
-* [ ] Opções adicionais de exibição no painel.
-* [ ] Melhor detecção do caminho do Claude Code.
-* [ ] Publicação no Cinnamon Spices.
+- [x] Session and weekly usage on the panel.
+- [x] Reset time (formatted date or relative countdown).
+- [x] Color indicators by usage level with configurable thresholds and color picker.
+- [x] Multilanguage support (EN / PT-BR).
+- [ ] Better support for different Cinnamon versions.
+- [ ] Better Claude Code path detection.
+- [ ] Publish to Cinnamon Spices.
 
-## 👤 Autor
+---
+
+## 👤 Author
 
 **riberman**
 
-## 📄 Licença
+## 📄 License
 
-Consulte o arquivo `LICENSE` deste repositório.
-
+See the `LICENSE` file in this repository.
