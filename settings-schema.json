@@ -1,4 +1,8 @@
 {
+    "layout": {
+        "type": "header",
+        "description": "Claude Code Usage Settings"
+    },
     "refreshInterval": {
         "type": "spinbutton",
         "default": 1,
@@ -7,5 +11,64 @@
         "step": 1,
         "units": "minutes",
         "description": "Usage refresh interval"
+    },
+    "useRelativeTime": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Show relative time (e.g. 'in 2 hours') instead of formatted date"
+    },
+    "sessionResetFormat": {
+        "type": "entry",
+        "default": "DD/MM HH:mm",
+        "description": "Session Reset Date Format (e.g. DD/MM HH:mm)",
+        "tooltip": "Use DD (day), MM (month), YYYY (year), HH (hour 24h), hh (hour 12h), mm (minute), ss (second), A (AM/PM)"
+    },
+    "weekResetFormat": {
+        "type": "entry",
+        "default": "DD/MM HH:mm",
+        "description": "Week Reset Date Format (e.g. DD/MM HH:mm)",
+        "tooltip": "Use DD (day), MM (month), YYYY (year), HH (hour 24h), hh (hour 12h), mm (minute), ss (second), A (AM/PM)"
+    },
+    "colorLayout": {
+        "type": "header",
+        "description": "Colors and Thresholds"
+    },
+    "useColors": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Enable colored text on the panel based on usage level"
+    },
+    "thresholdYellow": {
+        "type": "spinbutton",
+        "default": 30,
+        "min": 1,
+        "max": 99,
+        "step": 1,
+        "units": "%",
+        "description": "Threshold for Yellow (Green up to this %)"
+    },
+    "thresholdRed": {
+        "type": "spinbutton",
+        "default": 50,
+        "min": 2,
+        "max": 100,
+        "step": 1,
+        "units": "%",
+        "description": "Threshold for Red (Yellow up to this %)"
+    },
+    "colorGreen": {
+        "type": "colorchooser",
+        "default": "rgba(135,195,79,1)",
+        "description": "Low Usage Color (Green level)"
+    },
+    "colorYellow": {
+        "type": "colorchooser",
+        "default": "rgba(246,180,50,1)",
+        "description": "Medium Usage Color (Yellow level)"
+    },
+    "colorRed": {
+        "type": "colorchooser",
+        "default": "rgba(230,90,90,1)",
+        "description": "High Usage Color (Red level)"
     }
 }
