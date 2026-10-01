@@ -1,0 +1,11 @@
+{
+    "uuid": "claude-usage@riberman",
+    "name": "Claude Code Usage",
+    "description": "Displays Claude Code usage",
+    "icon": "applications-development",
+    "version": "1.1",
+    "author": "riberman",
+    "cinnamon-version": [
+        "6.4"
+    ]
+}
