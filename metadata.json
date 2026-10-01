@@ -1,9 +1,9 @@
 {
     "uuid": "claude-usage@riberman",
     "name": "Claude Code Usage",
-    "description": "Displays Claude Code usage",
+    "description": "Linux Cinnamon panel applet that displays Claude Code usage percentage from the /usage command.",
     "icon": "applications-development",
-    "version": "1.1",
+    "version": "1.2",
     "author": "riberman",
     "cinnamon-version": [
         "6.4"
