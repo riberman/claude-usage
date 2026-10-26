@@ -1,13 +1,32 @@
-# Claude Code Usage
+# AI Usage (Claude / AGY / Codex)
 
-A **Linux Cinnamon** panel applet that displays your **Claude Code** usage percentage, powered by the `/usage` command.
+A **Linux Cinnamon** panel applet that displays AI tool usage — **Claude Code**, **AGY (Antigravity CLI)**, or **OpenAI Codex** — directly in the panel. Monitor several tools at once.
 
+---
+
+## 📸 Panel examples
+
+**Claude Code:**
 ```text
 Claude 51%
 ```
 
-Hovering over the applet shows detailed information:
+**AGY (Antigravity CLI):**
+```text
+AGY G:16% C:49%
+```
+*(G = Gemini Models used, C = Claude & GPT models used)*
 
+**OpenAI Codex (not installed):**
+```text
+Codex N/A
+```
+
+---
+
+## 🪟 Tooltip examples
+
+### Claude Code
 ```text
 Claude Code Usage
 
@@ -23,18 +42,35 @@ Auto update: 1 min
 Hover again to refresh
 ```
 
+### AGY (Antigravity CLI)
+```text
+AGY (Antigravity) Usage
+
+Gemini (weekly)
+████████░░ 84%
+Resets: 31/10 21:36
+
+Claude & GPT (weekly)
+█████░░░░░ 49%
+Resets: 31/10 22:35
+
+Auto update: 1 min
+Hover again to refresh
+```
+
 ---
 
 ## ✨ Features
 
-- 📊 **Session usage** displayed directly on the panel.
-- 📈 **Weekly usage** shown in the tooltip.
-- ⏱️ **Reset time** for both session and week — shown as a formatted date or as a relative countdown ("in 2 hours", "in 3 days").
-- 🎨 **Color indicators** — panel text changes color (green / yellow / red) based on configurable usage thresholds. Colors are fully customizable via a color picker.
-- 🌐 **Multilanguage** — automatically uses **PT-BR** when the system language is Portuguese, otherwise defaults to **English**.
+- 🔍 **Multi-tool**: for each of Claude Code, AGY and Codex choose Off, Show in panel, or Tooltip only (the tooltip lists every enabled tool).
+- 📊 **Claude Code** — Session + weekly usage with reset times.
+- 🤖 **AGY (Antigravity CLI)** — Gemini Models and Claude & GPT Models weekly quotas, both shown simultaneously.
+- 🧩 **OpenAI Codex** — Detects installation; usage data surfaced when the CLI exposes it.
+- ⏱️ **Reset time** — shown as a formatted date or a relative countdown ("in 2 hours", "in 3 days").
+- 🎨 **Color indicators** — panel text changes color (green / yellow / red) based on configurable usage thresholds.
+- 🌐 **Multilanguage** — auto PT-BR / EN based on the system `LANG`.
 - 🔄 **Auto-refresh** at a configurable interval (default: 1 minute).
 - 🖱️ **Instant refresh** on mouse hover.
-- 🚫 Prevents simultaneous queries.
 - ⚡ All queries run **asynchronously** — the Cinnamon panel is never blocked.
 - 💾 **Keeps the last valid value** if a query fails.
 - ⚙️ **Integrated Cinnamon settings panel** for all options.
@@ -43,21 +79,35 @@ Hover again to refresh
 
 ## 🧠 How it works
 
-The applet runs locally:
+### Claude Code
 
 ```bash
 claude -p "/usage"
 ```
 
-It parses the full output to extract:
-- The **usage percentage** for the current session and the current week.
-- The **reset date/time** for each (e.g. `Oct 5, 6:59am (America/Sao_Paulo)`).
+Parses text output:
+- **Session** usage % and reset date (e.g. `Oct 5, 6:59am`).
+- **Weekly** usage % and reset date.
 
-The reset date is parsed into a `Date` object so it can be:
-1. Formatted using a user-defined pattern (e.g. `DD/MM HH:mm` → `05/10 06:59`).
-2. Shown as a relative time diff (e.g. `in 3 days`, `in 2 hours`).
+### AGY (Antigravity CLI)
 
-The project has **no backend, no database, and no external API**.
+```bash
+agy --output-format json -p "/usage"
+```
+
+Parses JSON response — richer than text mode:
+- **`command.data.groups[]`** — one entry per quota group.
+- `remaining_fraction` (0–1) converted to **used %** (`(1 − remaining) × 100`).
+- `reset_time` in ISO 8601 (e.g. `2026-10-31T01:35:17Z`) — no month-name parsing needed.
+- Two groups displayed: **Gemini Models** and **Claude & GPT models**.
+
+### OpenAI Codex
+
+```bash
+codex --help  # path-check only; no /usage equivalent yet
+```
+
+Detected via `GLib.find_program_in_path`. Panel shows `Codex N/A` when not installed.
 
 ---
 
@@ -65,31 +115,11 @@ The project has **no backend, no database, and no external API**.
 
 ```text
 claude-usage@riberman/
-├── applet.js           # Main applet logic
-├── metadata.json       # Cinnamon applet metadata
-├── settings-schema.json # Settings definitions
-├── install.sh          # Installer script
+├── applet.js            # Main applet logic
+├── metadata.json        # Cinnamon applet metadata
+├── settings-schema.json  # Settings definitions
+├── install.sh           # Installer script
 └── README.md
-```
-
-### `applet.js`
-
-Core applet implementation: Claude Code querying, output parsing, display updates, timers, color logic, i18n, and error handling.
-
-### `metadata.json`
-
-Metadata used by Cinnamon to identify the applet.
-
-### `settings-schema.json`
-
-Defines all configurable options (see Settings section below).
-
-### `install.sh`
-
-Copies all applet files to:
-
-```text
-~/.local/share/cinnamon/applets/claude-usage@riberman
 ```
 
 ---
@@ -98,8 +128,6 @@ Copies all applet files to:
 
 ### One-liner (no git required)
 
-Install directly from GitHub with a single command — works with `wget` or `curl`:
-
 ```bash
 # with wget
 bash <(wget -qO- https://raw.githubusercontent.com/riberman/claude-usage/main/install-remote.sh)
@@ -107,8 +135,6 @@ bash <(wget -qO- https://raw.githubusercontent.com/riberman/claude-usage/main/in
 # with curl
 bash <(curl -fsSL https://raw.githubusercontent.com/riberman/claude-usage/main/install-remote.sh)
 ```
-
-This downloads `applet.js`, `metadata.json` and `settings-schema.json` directly into the Cinnamon applets directory and prints next steps.
 
 ### Manual (clone the repo)
 
@@ -119,33 +145,31 @@ chmod +x install.sh
 ./install.sh
 ```
 
-### After installing (either method)
+### After installing
 
-Open:
-
-**System Settings → Applets → Claude Code Usage**
-
-and add the applet to your panel. No `sudo` required.
+Open **System Settings → Applets → AI Usage (Claude / AGY / Codex)** and add the applet to your panel. No `sudo` required.
 
 ---
 
 ## ⚙️ Settings
 
-All settings are accessible by right-clicking the applet on the panel and selecting **Configure**.
+All settings are accessible by right-clicking the applet → **Configure**.
 
 ### General
 
 | Setting | Default | Description |
 |---|---|---|
+| Claude / AGY / Codex mode | panel / tooltip | Off, Show in panel, or Tooltip only (per tool) |
 | Refresh interval | `1 min` | How often usage is auto-refreshed (1–60 min) |
+
 
 ### Reset Time Display
 
 | Setting | Default | Description |
 |---|---|---|
 | Show relative time | `off` | Show countdown ("in 2 hours") instead of a formatted date |
-| Session reset format | `DD/MM HH:mm` | Date format for the session reset time |
-| Week reset format | `DD/MM HH:mm` | Date format for the week reset time |
+| Session reset format | `DD/MM HH:mm` | Date format for the Claude session reset time |
+| Week reset format | `DD/MM HH:mm` | Date format for the weekly reset time (all tools) |
 
 **Format tokens:**
 
@@ -172,22 +196,16 @@ All settings are accessible by right-clicking the applet on the panel and select
 | Yellow color | `rgba(246,180,50,1)` | Color for medium usage |
 | Red color | `rgba(230,90,90,1)` | Color for high usage |
 
-Colors can be customized via the native Cinnamon color picker (supports RGBA/HEX).
+> **AGY color:** uses the **Claude & GPT** group as the primary indicator (higher cost models).
 
 ---
 
 ## 🌐 Multilanguage
 
-The applet auto-detects the system language via the `LANG` environment variable.
-
 | Language | Display |
 |---|---|
-| Portuguese (`pt_*`) | PT-BR — "Sessão", "Semana", "Reseta:", "em 2 horas", etc. |
-| Any other | English — "Session", "Week", "Resets:", "in 2 hours", etc. |
-
-The tooltip title also adapts:
-- PT-BR: `Claude Code Uso`
-- EN: `Claude Code Usage`
+| Portuguese (`pt_*`) | PT-BR — "Sessão", "Semana", "Reseta:", "Gemini (semanal)", "Claude & GPT (semanal)", "em 2 horas" |
+| Any other | English — "Session", "Week", "Resets:", "Gemini (weekly)", "Claude & GPT (weekly)", "in 2 hours" |
 
 ---
 
@@ -195,22 +213,31 @@ The tooltip title also adapts:
 
 - Linux
 - Cinnamon Desktop (tested on Cinnamon 6.4)
-- Claude Code installed and authenticated
+- At least one of:
+  - **Claude Code** installed and authenticated (`claude -p "/usage"` works)
+  - **AGY (Antigravity CLI)** installed (`agy --output-format json -p "/usage"` works)
+  - **OpenAI Codex** installed (detection only for now)
 
 Test before installing:
 
 ```bash
+# Claude
 claude -p "/usage"
+
+# AGY
+agy --output-format json -p "/usage"
 ```
 
 ---
 
 ## 🐛 Troubleshooting
 
-If the applet shows `Claude --%`, run the command manually in a terminal:
+If the applet shows `--%`, run the relevant command manually:
 
 ```bash
 claude -p "/usage"
+# or
+agy --output-format json -p "/usage"
 ```
 
 If it works in the terminal but not in the applet, there may be a `PATH` difference in the graphical session. The applet uses `/bin/bash -lc` to load the login shell profile, which normally resolves this.
@@ -219,7 +246,7 @@ If it works in the terminal but not in the applet, there may be a `PATH` differe
 
 ## 🔐 Privacy
 
-The applet only executes Claude Code locally and processes its output.
+The applet only executes CLI tools locally and processes their output.
 
 No data is sent to any server. No prompts or conversations are stored.
 
@@ -227,12 +254,15 @@ No data is sent to any server. No prompts or conversations are stored.
 
 ## 🗺️ Roadmap
 
-- [x] Session and weekly usage on the panel.
+- [x] Session and weekly usage on the panel (Claude Code).
 - [x] Reset time (formatted date or relative countdown).
-- [x] Color indicators by usage level with configurable thresholds and color picker.
+- [x] Color indicators by usage level with configurable thresholds.
 - [x] Multilanguage support (EN / PT-BR).
+- [x] **AGY (Antigravity CLI)** support — Gemini + Claude/GPT weekly quotas.
+- [x] **OpenAI Codex** detection.
+- [x] **Auto-detect** active tool from PATH.
+- [ ] OpenAI Codex usage data (pending CLI support).
 - [ ] Better support for different Cinnamon versions.
-- [ ] Better Claude Code path detection.
 - [ ] Publish to Cinnamon Spices.
 
 ---

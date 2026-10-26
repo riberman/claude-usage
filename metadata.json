@@ -1,9 +1,9 @@
 {
     "uuid": "claude-usage@riberman",
-    "name": "Claude Code Usage",
-    "description": "Linux Cinnamon panel applet that displays Claude Code usage percentage from the /usage command.",
+    "name": "AI Usage (Claude / AGY / Codex)",
+    "description": "Linux Cinnamon panel applet that displays AI tool usage (Claude Code, AGY Antigravity CLI, or OpenAI Codex). Monitor several tools at once.",
     "icon": "applications-development",
-    "version": "1.2",
+    "version": "2.0",
     "author": "riberman",
     "cinnamon-version": [
         "6.4"

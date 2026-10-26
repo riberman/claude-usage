@@ -1,7 +1,67 @@
 {
     "layout": {
         "type": "header",
-        "description": "Claude Code Usage Settings"
+        "description": "AI Usage Settings (Claude / AGY / Codex)"
+    },
+    "toolsLayout": {
+        "type": "header",
+        "description": "Tools (panel = percentage on panel + tooltip; tooltip only = shown on hover)"
+    },
+    "showIcons": {
+        "type": "switch",
+        "default": true,
+        "description": "Show tool icons instead of text names on the panel",
+        "tooltip": "When enabled, shows the tool's icon (Claude, AGY or Codex) next to the percentage. When disabled, shows the tool name as text."
+    },
+    "claudeMode": {
+        "type": "combobox",
+        "default": "panel",
+        "options": {
+            "Off": "off",
+            "Show in panel": "panel",
+            "Tooltip only": "tooltip"
+        },
+        "description": "Claude Code"
+    },
+    "claudeShowDay": {
+        "type": "switch",
+        "default": true,
+        "description": "Claude: show daily/session (D) on the panel"
+    },
+    "claudeShowWeek": {
+        "type": "switch",
+        "default": true,
+        "description": "Claude: show weekly (S) on the panel"
+    },
+    "agyMode": {
+        "type": "combobox",
+        "default": "tooltip",
+        "options": {
+            "Off": "off",
+            "Show in panel": "panel",
+            "Tooltip only": "tooltip"
+        },
+        "description": "Antigravity CLI (agy)"
+    },
+    "agyShowGoogle": {
+        "type": "switch",
+        "default": true,
+        "description": "Antigravity CLI: show Google models (G) on the panel"
+    },
+    "agyShowOther": {
+        "type": "switch",
+        "default": true,
+        "description": "Antigravity CLI: show other models (O) on the panel"
+    },
+    "codexMode": {
+        "type": "combobox",
+        "default": "tooltip",
+        "options": {
+            "Off": "off",
+            "Show in panel": "panel",
+            "Tooltip only": "tooltip"
+        },
+        "description": "OpenAI Codex"
     },
     "refreshInterval": {
         "type": "spinbutton",
@@ -12,6 +72,10 @@
         "units": "minutes",
         "description": "Usage refresh interval"
     },
+    "timeLayout": {
+        "type": "header",
+        "description": "Reset Time Display"
+    },
     "useRelativeTime": {
         "type": "checkbox",
         "default": false,
@@ -20,13 +84,13 @@
     "sessionResetFormat": {
         "type": "entry",
         "default": "DD/MM HH:mm",
-        "description": "Session Reset Date Format (e.g. DD/MM HH:mm)",
+        "description": "Session Reset Date Format (Claude only, e.g. DD/MM HH:mm)",
         "tooltip": "Use DD (day), MM (month), YYYY (year), HH (hour 24h), hh (hour 12h), mm (minute), ss (second), A (AM/PM)"
     },
     "weekResetFormat": {
         "type": "entry",
         "default": "DD/MM HH:mm",
-        "description": "Week Reset Date Format (e.g. DD/MM HH:mm)",
+        "description": "Week / Quota Reset Date Format (e.g. DD/MM HH:mm)",
         "tooltip": "Use DD (day), MM (month), YYYY (year), HH (hour 24h), hh (hour 12h), mm (minute), ss (second), A (AM/PM)"
     },
     "colorLayout": {
